@@ -29,7 +29,7 @@ Write a short abstract (1 page max) that should cover the following:
 * Give at least one real-world application example of Deep Learning in Visual Computing that you find interesting/impressive and explain why. You can also discuss potential negative social impacts. Provide references! 
 * Include a screenshot of your package list from Part 0. 
 
-Submit your assignment as .pdf file on [TUWEL](https://tuwel.tuwien.ac.at/course/view.php?id=63323) until __March 18th 11pm__. Also, please only register for a group if you have submitted this assignment. 
+Submit your assignment as .pdf file on [TUWEL](https://tuwel.tuwien.ac.at/course/view.php?id=72011) until __March 18th 11pm__. Also, please only register for a group if you have submitted this assignment. 
 
 
 
