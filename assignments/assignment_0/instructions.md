@@ -18,7 +18,7 @@ The PyTorch setup varies a bit depending on the OS, see [here](https://pytorch.o
 
     python -c "import torch; print(torch.__version__)"
 
-To confirm that all required packages haven been installed corretly, list them with `$ pip list` and take a screenshot of your terminal window for Part 1. 
+We will also need the `torchvision` package; make sure to install a version >= 0.17.x. To confirm that all required packages haven been installed corretly, list them with `$ pip list` and take a screenshot of your terminal window for Part 1. 
 
 ## Part 1
 
