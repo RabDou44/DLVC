@@ -62,7 +62,25 @@ class Accuracy(PerformanceMeasure):
         """
 
         ## TODO implement
-        pass
+        if len(prediction.shape) != 2 or len(target.shape) != 1:
+            raise ValueError("[Invalid shape]")
+        
+        if prediction.shape[0] != target.shape[0]:
+            raise ValueError("[Invalid shape]")
+        
+        if prediction.shape[1] != len(self.classes):
+            raise ValueError("[Invalid shape]")
+        
+        prediction = torch.argmax(prediction, dim=1)
+
+        # class accuracy prdiction
+        self.n_total += len(prediction)
+        for i in range(len(prediction)):
+            if prediction[i] == target[i]:
+                self.n_matching += 1
+                self.correct_pred[target[i]] += 1
+            self.total_pred[target[i]] += 1
+
 
     def __str__(self):
         """
@@ -70,7 +88,10 @@ class Accuracy(PerformanceMeasure):
         """
 
         ## TODO implement
-        pass
+        return (
+            f"Accuracy: {self.accuracy() * 100:.2f} %\n"
+            f"Per class accuracy: {self.per_class_accuracy() * 100:.2f} %\n"
+        )
 
     def accuracy(self) -> float:
         """
@@ -79,7 +100,7 @@ class Accuracy(PerformanceMeasure):
         """
 
         ## TODO implement
-        pass
+        return self.n_matching / self.n_total if self.n_total != 0 else 0.0
 
     def per_class_accuracy(self) -> float:
         """
@@ -87,4 +108,4 @@ class Accuracy(PerformanceMeasure):
         Returns 0 if no data is available (after resets).
         """
         ## TODO implement
-        pass
+        return sum( [(v / self.total_pred[k]) /len(self.classes) for k, v in self.correct_pred.items()]) if self.n_total != 0 else 0.0
