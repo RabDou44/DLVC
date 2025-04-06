@@ -1,5 +1,6 @@
 import pickle
 from typing import Tuple
+import os
 import numpy as np
 
 
@@ -25,7 +26,7 @@ class CIFAR10Dataset(ClassificationDataset):
             "frog",
             "horse",
             "ship",
-            "truck",
+            "truck"
         )
 
         self.fdir = fdir
@@ -53,14 +54,43 @@ class CIFAR10Dataset(ClassificationDataset):
 
         # TODO implement
         # See the CIFAR-10 website on how to load the data files
-        pass
+        FILES = [f"data_batch_{x+1}" for x in range(5)] + ["test_batch"]
+        dir_files = os.listdir(self.fdir)
+        read_files = []
+
+        if self.fdir is None or not os.path.isdir(self.fdir):
+            raise ValueError("[Wrong directory]")
+        if sum([1 for file in FILES if file in dir_files]) < 6:
+            raise ValueError("[Files in fdir missing]")
+
+        import pickle
+        if self.subset == Subset.TRAINING:
+            read_files = [f"data_batch_{x+1}" for x in range(4)]
+        elif self.subset == Subset.VALIDATION:
+            read_files = ["data_batch_5"]
+        elif self.subset == Subset.TEST:
+            read_files = ["test_batch"]
+        else:
+            raise ValueError("[Unknown subset value]")
+
+        labels = []
+        images = np.empty((0, 32, 32, 3), dtype=np.uint8)
+        for file in read_files:
+            with open(os.path.join(self.fdir, file), "rb") as f:
+                dict = pickle.load(f, encoding="bytes")
+
+                labels += dict[b'labels']
+                data  = dict[b'data'].reshape((-1, 3, 32, 32)).transpose(0,2,3,1) .astype(np.uint8)
+                images = np.vstack((images, data))
+        
+        return images, labels
 
     def __len__(self) -> int:
         """
         Returns the number of samples in the dataset.
         """
         # TODO implement
-        pass
+        return self.images.shape[0]
 
     def __getitem__(self, idx: int) -> Tuple:
         """
@@ -70,11 +100,11 @@ class CIFAR10Dataset(ClassificationDataset):
         Raises IndexError if the index is out of bounds.
         """
         # TODO implement
-        pass
+        return self.images[idx], self.labels[idx]
 
     def num_classes(self) -> int:
         """
         Returns the number of classes.
         """
         # TODO implement
-        pass
+        return len(self.classes)
