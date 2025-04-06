@@ -17,7 +17,10 @@ class DeepClassifier(nn.Module):
         '''
 
         ## TODO implement
-        pass
+        path = save_dir / "model.pt" if suffix is None else save_dir / f"{self.net.__class__.__name__}{suffix}.pt"
+        if not save_dir.exists():
+            save_dir.mkdir(parents=True, exist_ok=True)
+        torch.save(self.net.state_dict(), path)
 
     def load(self, path):
         '''
@@ -26,4 +29,5 @@ class DeepClassifier(nn.Module):
         '''
         
         ## TODO implement
-        pass
+        self.net.load_state_dict(torch.load(path))
+        self.net.eval()
