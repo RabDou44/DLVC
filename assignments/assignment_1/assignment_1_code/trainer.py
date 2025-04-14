@@ -3,9 +3,11 @@ from typing import Tuple
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from tqdm import tqdm
+from torch.utils.data import DataLoader
 
 # for wandb users:
 from assignment_1_code.wandb_logger import WandBLogger
+from assignment_1_code.metrics import Accuracy
 
 
 class BaseTrainer(metaclass=ABCMeta):
@@ -53,9 +55,9 @@ class ImgClassificationTrainer(BaseTrainer):
         val_metric,
         train_data,
         val_data,
-        device,
-        num_epochs: int,
-        training_save_dir: Path,
+        device=None,
+        num_epochs: int = 10,
+        training_save_dir: Path = Path("./trained_models"),
         batch_size: int = 4,
         val_frequency: int = 5,
     ) -> None:
@@ -84,7 +86,21 @@ class ImgClassificationTrainer(BaseTrainer):
         """
 
         ## TODO implement
-        pass
+        self.model = model
+        self.optimizer = optimizer
+        self.loss_fn = loss_fn
+        self.lr_scheduler = lr_scheduler
+        self.train_metric = train_metric
+        self.val_metric = val_metric
+        self.train_data = train_data
+        self.val_data = val_data
+        self.device = device
+        self.num_epochs = num_epochs
+        self.training_save_dir = training_save_dir
+        self.batch_size = batch_size
+        self.val_frequency = val_frequency
+
+        self.best_val_mPCAcc = 0.0
 
     def _train_epoch(self, epoch_idx: int) -> Tuple[float, float, float]:
         """
@@ -95,7 +111,30 @@ class ImgClassificationTrainer(BaseTrainer):
         epoch_idx (int): Current epoch number
         """
         ## TODO implement
-        pass
+        train_loader = DataLoader(
+            self.train_data, 
+            batch_size=self.batch_size, 
+            shuffle=True, 
+            num_workers=4
+        )
+
+        for i, (inputs, labels) in enumerate(train_loader):
+            # inputs, labels = inputs.to(self.device), labels.to(self.device)
+            self.optimizer.zero_grad()
+
+            outputs = self.model(inputs)
+            loss = self.loss_fn(outputs, labels)
+
+            # Backward pass and optimize
+            loss.backward()
+            self.optimizer.step()
+
+            # update metrics
+            self.train_metric.update(outputs, labels)
+
+        # Statistics
+        return (loss.item(), self.train_metric.accuracy(), self.train_metric.per_class_accuracy())
+            
 
     def _val_epoch(self, epoch_idx: int) -> Tuple[float, float, float]:
         """
@@ -106,7 +145,29 @@ class ImgClassificationTrainer(BaseTrainer):
         epoch_idx (int): Current epoch number
         """
         ## TODO implement
-        pass
+        val_loader = DataLoader(
+            self.val_data, 
+            batch_size=self.batch_size, 
+            shuffle=True, 
+            num_workers=4
+        )
+        
+        for i, (inputs, labels) in enumerate(val_loader):
+            # inputs, labels = inputs.to(self.device), labels.to(self.device)
+            self.optimizer.zero_grad()
+        
+            outputs = self.model(inputs)
+            loss = self.loss_fn(outputs, labels)
+
+            # Backward pass and optimize
+            loss.backward()
+            self.optimizer.step()
+
+            # update metrics
+            self.val_metric.update(outputs, labels)
+
+        # Statistics
+        return (loss.item(), self.val_metric.accuracy(), self.val_metric.per_class_accuracy())
 
     def train(self) -> None:
         """
@@ -117,4 +178,20 @@ class ImgClassificationTrainer(BaseTrainer):
         Depending on the val_frequency parameter, validation is not performed every epoch.
         """
         ## TODO implement
-        pass
+        for epoch in range(self.num_epochs):
+            print(f"______epoch [{epoch+1}/{self.num_epochs}]")
+
+            # Training
+            train_loss, train_mAcc, train_mPCAcc = self._train_epoch(epoch)
+            print(f"Train Loss: {train_loss}\n\naccuracy: {train_mAcc}\naccuracy per class: {train_mPCAcc}\n")
+
+            # Validation
+            if (epoch + 1) % self.val_frequency == 0:
+                val_loss, val_mAcc, val_mPCAcc = self._val_epoch(epoch)
+                print(f"Validation Loss :{val_loss}\n\naccuracy: {val_mAcc}\naccuracy per class: {val_mPCAcc}")
+
+                # Save model if validation mPCAcc is higher than current best
+                if val_mPCAcc > self.best_val_mPCAcc:
+                    self.best_val_mPCAcc = val_mPCAcc
+                    torch.save(self.model.state_dict(), self.training_save_dir / "best_model.pth")
+                    print("Model saved!")

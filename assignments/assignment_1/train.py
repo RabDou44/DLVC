@@ -7,13 +7,18 @@ from pathlib import Path
 import os
 
 from assignment_1_code.models.class_model import (
-    DeepClassifier,
+    DeepClassifier
 )  # etc. change to your model
 from assignment_1_code.metrics import Accuracy
 from assignment_1_code.trainer import ImgClassificationTrainer
 from assignment_1_code.datasets.cifar10 import CIFAR10Dataset
 from assignment_1_code.datasets.dataset import Subset
 
+# models
+from torchvision.models import resnet18
+
+# lr_schedulers
+from torch.optim.lr_scheduler import ExponentialLR
 
 def train(args):
 
@@ -38,25 +43,29 @@ def train(args):
         ]
     )
 
-    train_data = ...
+    train_data = CIFAR10Dataset(args.path, 
+                                Subset.TRAINING,
+                                transform=train_transform)
 
-    val_data = ...
+    val_data = CIFAR10Dataset(args.path,
+                              Subset.VALIDATION,
+                              transform=val_transform)
 
-    device = ...
+    device = None
 
-    model = DeepClassifier(...)
+    model = DeepClassifier(resnet18())
     model.to(device)
-    optimizer = ...
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
     loss_fn = torch.nn.CrossEntropyLoss()
 
     train_metric = Accuracy(classes=train_data.classes)
     val_metric = Accuracy(classes=val_data.classes)
-    val_frequency = 5
+    val_frequency = 2
 
     model_save_dir = Path("saved_models")
     model_save_dir.mkdir(exist_ok=True)
 
-    lr_scheduler = ...
+    lr_scheduler = ExponentialLR(optimizer, gamma=0.9)
 
     trainer = ImgClassificationTrainer(
         model,
@@ -82,11 +91,17 @@ if __name__ == "__main__":
     args.add_argument(
         "-d", "--gpu_id", default="0", type=str, help="index of which GPU to use"
     )
+    args.add_argument(
+        "-p", "--path", default="./assignments/assignment_1/assignment_1_code/fdir/", type=str, help="path to dataset"
+    )
+    args.add_argument("-s","--save_path", default="./saved_models/", type=str, help="path to save model")
+    args.add_argument("-e","--num_epochs", default=10, type=int, help="number of epochs")
+    args.add_argument("-b","--batch_size", default=128, type=int, help="batch size")
+    args.add_argument("-l","--learning_rate", default=0.001, type=float, help="learning rate")
 
     if not isinstance(args, tuple):
         args = args.parse_args()
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
     args.gpu_id = 0
-    args.num_epochs = 30
 
     train(args)

@@ -7,9 +7,13 @@ class DeepClassifier(nn.Module):
         super().__init__()
         self.net = net
 
+        # assuming that last layer is same as in resnet18
+        # this is a bit hacky, but it works for now
+        self.final_layer = nn.Linear(net.fc.out_features, 10)  
+
     def forward(self, x):
-        return self.net(x)
-    
+        x = self.net.forward(x)
+        return self.final_layer(x)
 
     def save(self, save_dir: Path, suffix=None):
         '''
