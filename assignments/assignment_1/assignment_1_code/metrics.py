@@ -78,8 +78,8 @@ class Accuracy(PerformanceMeasure):
         for i in range(len(prediction)):
             if prediction[i] == target[i]:
                 self.n_matching += 1
-                self.correct_pred[target[i]] += 1
-            self.total_pred[target[i]] += 1
+                self.correct_pred[self.classes[target[i]]] += 1
+            self.total_pred[self.classes[target[i]]] += 1
 
 
     def __str__(self):
@@ -88,11 +88,10 @@ class Accuracy(PerformanceMeasure):
         """
 
         ## TODO implement
-        return (
-            f"Accuracy: {self.accuracy() * 100:.2f} %\n"
-            f"Per class accuracy: {self.per_class_accuracy() * 100:.2f} %\n"
-        )
-
+        header  =  f"Accuracy: {self.accuracy() * 100:.2f} %\n" + f"Per class accuracy: {self.per_class_accuracy() * 100:.2f}"
+        body = [f"Accuracy for class: {label} is {self.correct_pred[label]/self.total_pred[label]:.2f}" for label in self.classes]
+        return header + "\n".join(body) + "\n"
+    
     def accuracy(self) -> float:
         """
         Compute and return the accuracy as a float between 0 and 1.

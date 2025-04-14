@@ -80,7 +80,7 @@ class CIFAR10Dataset(ClassificationDataset):
                 dict = pickle.load(f, encoding="bytes")
 
                 labels += dict[b'labels']
-                data  = dict[b'data'].reshape((-1, 3, 32, 32)).transpose(0,2,3,1) .astype(np.uint8)
+                data  = dict[b'data'].reshape((-1, 3, 32, 32)).transpose(0,2,3,1).astype(np.uint8)
                 images = np.vstack((images, data))
         
         return images, labels
@@ -99,8 +99,15 @@ class CIFAR10Dataset(ClassificationDataset):
         Applies transforms if not None.
         Raises IndexError if the index is out of bounds.
         """
+        if idx < 0 or idx >= len(self):
+            raise IndexError("[Index out of bounds]")
+        image = self.images[idx]
+        label = self.labels[idx]
         # TODO implement
-        return self.images[idx], self.labels[idx]
+        if self.transform is not None:
+            image = self.transform(self.images[idx])
+            label = self.transform(self.labels[idx])
+        return image, label
 
     def num_classes(self) -> int:
         """
