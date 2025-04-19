@@ -9,6 +9,9 @@ import os
 from assignment_1_code.models.class_model import (
     DeepClassifier
 )  # etc. change to your model
+from assignment_1_code.models.cnn import (
+    YourCNN
+)
 from assignment_1_code.metrics import Accuracy
 from assignment_1_code.trainer import ImgClassificationTrainer
 from assignment_1_code.datasets.cifar10 import CIFAR10Dataset
@@ -53,7 +56,8 @@ def train(args):
 
     device = None
 
-    model = DeepClassifier(resnet18())
+    #model = DeepClassifier(resnet18())
+    model = YourCNN()
     model.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
     loss_fn = torch.nn.CrossEntropyLoss()
@@ -84,7 +88,6 @@ def train(args):
     )
     trainer.train()
 
-
 if __name__ == "__main__":
     ## Feel free to change this part - you do not have to use this argparse and gpu handling
     args = argparse.ArgumentParser(description="Training")
@@ -92,7 +95,7 @@ if __name__ == "__main__":
         "-d", "--gpu_id", default="0", type=str, help="index of which GPU to use"
     )
     args.add_argument(
-        "-p", "--path", default="./assignments/assignment_1/assignment_1_code/fdir/", type=str, help="path to dataset"
+        "-p", "--path", default="./assignment_1_code/fdir/", type=str, help="path to dataset"
     )
     args.add_argument("-s","--save_path", default="./saved_models/", type=str, help="path to save model")
     args.add_argument("-e","--num_epochs", default=10, type=int, help="number of epochs")
