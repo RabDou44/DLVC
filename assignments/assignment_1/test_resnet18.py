@@ -37,9 +37,16 @@ def test(args):
     device = ...
     num_test_data = len(test_data)
 
-    model = DeepClassifier(resnet18())
+    r_model = resnet18()
+    r_model.fc = torch.nn.Linear(r_model.fc.in_features, 10)
+    model = DeepClassifier(r_model)
     model.load(args.model_path)
     # model.to(device)
+
+    if not Path(args.results_path).exists():
+        raise ValueError("[Path to results file does not exist]")
+
+    results_file_path = Path(args.results_path) / f"{Subset.TEST.__str__()}_log_ResNet18.csv"
 
     loss_fn = torch.nn.CrossEntropyLoss()
 
@@ -58,14 +65,9 @@ def test(args):
 
         test_metric.update(output, target)
 
-        print(f"Batch {batch_idx}/{len(test_data_loader)}: Loss: {loss.item()}, accuracy: {test_metric.accuracy()}, per class accuracy: {test_metric.per_class_accuracy()}")
-
-    with open(args.results_path, "w") as f:
-        f.write(f"Test Loss: {loss.item()}\n")
-        f.write(f"Test Accuracy: {test_metric.accuracy()}\n")
-        f.write(f"Test Per Class Accuracy: {test_metric.per_class_accuracy()}\n")
-        f.write(f"Accuracy per class:\n{test_metric.__str__()}\n")
-
+        with open(results_file_path, "a") as f:
+            f.write(f"{batch_idx+1},{loss.item()},{test_metric.accuracy()},{test_metric.per_class_accuracy()}\n")
+        print(test_metric)
 
 if __name__ == "__main__":
     ## Feel free to change this part - you do not have to use this argparse and gpu handling
@@ -79,6 +81,7 @@ if __name__ == "__main__":
     args.add_argument("-m","--model_path", default="./saved_models//best_model.pth", type=str, help="path to save model")
     args.add_argument("-b","--batch_size", default=128, type=int, help="batch size")
     args.add_argument("-r","--results_path", default="./results/", type=str, help="path to save results")
+    args.add_argument("-e","--num_epochs", default=10, type=int, help="number of epochs")
 
     if not isinstance(args, tuple):
         args = args.parse_args()
@@ -89,6 +92,10 @@ if __name__ == "__main__":
         raise ValueError("[Path to TEST set does not exist]")
     
     if not Path(args.model_path).exists():
-        raise ValueError("[Path to save model does not exist]")
+        raise ValueError("[Path to model does not exist]")
+    
+    if args.num_epochs <= 0:
+        raise ValueError("[Number of epochs must be greater than 0]")
+
 
     test(args)

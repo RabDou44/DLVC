@@ -5,26 +5,23 @@ from pathlib import Path
 class DeepClassifier(nn.Module):
     def __init__(self, net: nn.Module):
         super().__init__()
+        # check if net has 10 classes in the last layer
         self.net = net
 
-        # assuming that last layer is same as in resnet18
-        # this is a bit hacky, but it works for now
-        self.final_layer = nn.Linear(net.fc.out_features, 10)  
-
     def forward(self, x):
-        x = self.net.forward(x)
-        return self.final_layer(x)
+        return self.net.forward(x)
 
     def save(self, save_dir: Path, suffix=None):
         '''
         Saves the model, adds suffix to filename if given
         '''
+        name_model = self.net.__class__.__name__
 
         ## TODO implement
-        path = save_dir / "model.pt" if suffix is None else save_dir / f"{self.net.__class__.__name__}{suffix}.pt"
+        path = save_dir / f"{name_model}" if suffix is None else save_dir / f"{name_model}{suffix}.pt"
         if not save_dir.exists():
             save_dir.mkdir(parents=True, exist_ok=True)
-        torch.save(self.net.state_dict(), path)
+        torch.save(self.state_dict(), path)
 
     def load(self, path):
         '''
@@ -33,5 +30,6 @@ class DeepClassifier(nn.Module):
         '''
         
         ## TODO implement
-        self.net.load_state_dict(torch.load(path))
-        self.net.eval()
+        state_dict = torch.load(path)
+        self.load_state_dict(state_dict)
+        self.eval()

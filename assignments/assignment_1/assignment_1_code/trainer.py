@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from assignment_1_code.wandb_logger import WandBLogger
 from assignment_1_code.metrics import Accuracy
 
+from assignment_1_code.datasets.dataset import Subset
 
 class BaseTrainer(metaclass=ABCMeta):
     """
@@ -183,15 +184,26 @@ class ImgClassificationTrainer(BaseTrainer):
 
             # Training
             train_loss, train_mAcc, train_mPCAcc = self._train_epoch(epoch)
-            print(f"Train Loss: {train_loss}\n\naccuracy: {train_mAcc}\naccuracy per class: {train_mPCAcc}\n")
+            print(self.train_metric)
 
+            # save metric to file
+            with open(self.training_save_dir / f"{str(Subset.TRAINING)}_log_{self.model.net.__class__.__name__}.csv", "a") as f:
+                f.write(f"{epoch+1}, {train_loss}, {train_mAcc}, {train_mPCAcc}\n")
+            
             # Validation
             if (epoch + 1) % self.val_frequency == 0:
                 val_loss, val_mAcc, val_mPCAcc = self._val_epoch(epoch)
-                print(f"Validation Loss :{val_loss}\n\naccuracy: {val_mAcc}\naccuracy per class: {val_mPCAcc}")
+                print(self.val_metric)
 
+                # save metric summary to file\
+                with open(self.training_save_dir / f"{str(Subset.VALIDATION
+                                                          )}_log_{self.model.net.__class__.__name__}.csv", "a") as f:
+                    f.write(f"{epoch+1}, {val_loss}, {val_mAcc}, {val_mPCAcc}\n")
                 # Save model if validation mPCAcc is higher than current best
+
                 if val_mPCAcc > self.best_val_mPCAcc:
                     self.best_val_mPCAcc = val_mPCAcc
-                    torch.save(self.model.state_dict(), self.training_save_dir / "best_model.pth")
-                    print("Model saved!")
+                    # torch.save(self.model.state_dict(), self.training_save_dir)
+                    self.model.save(self.training_save_dir)
+                    print(f"Model saved in {self.training_save_dir}")
+

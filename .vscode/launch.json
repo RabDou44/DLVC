@@ -4,44 +4,77 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-    
         {
-            "name": "Python Debugger: Current File",
+            "name": "TRAIN - ResNet18- CIFAR-10",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "args": ["--path", "${workspaceFolder}/assignments/assignment_1/assignment_1_code/fdir"],
-        },
-        {
-            "name": "Run TRAIN - CIFAR-10",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/assignments/assignment_1/train.py",
+            "program": "${workspaceFolder}/assignments/assignment_1/train_resnet18.py",
             "console": "integratedTerminal",
             "args": [
                 "--path",
                 "${workspaceFolder}/assignments/assignment_1/assignment_1_code/fdir",
                 "--save_path",
-                "${workspaceFolder}/assignments/assignment_1/assignment_1_code/fdir",
+                "${workspaceFolder}/saved_models",
                 "--num_epochs",
-                "10"
+                "10",
+                "--batch_size",
+                "128",
+                "--learning_rate",
+                "0.01"
             ]
         },
         {
-            "name": "Run TEST - CIFAR-10",
+            "name": "TEST - ResNet18- CIFAR-10",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/assignments/assignment_1/test.py",
+            "program": "${workspaceFolder}/assignments/assignment_1/test_resnet18.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--path",
+                "${workspaceFolder}/assignments/assignment_1/assignment_1_code/fdir",
+                "--model_path",
+                "${workspaceFolder}/saved_models/ResNet",
+                "--results_path",
+                "${workspaceFolder}/saved_models"
+            ]
+        },
+        {
+            "name": "RUN_CHECK ResNet",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/assignments/assignment_1/train_resnet18.py",
             "console": "integratedTerminal",
             "args": [
                 "--path",
                 "${workspaceFolder}/assignments/assignment_1/assignment_1_code/fdir",
                 "--save_path",
-                "${workspaceFolder}/assignments/assignment_1/assignment_1_code/fdir",
+                "${workspaceFolder}/saved_models",
                 "--num_epochs",
-                "10"
+                "1",
+                "--batch_size",
+                "40000",
+                "--learning_rate",
+                "0.01"
             ]
+        },
+        {
+            "name":"TRAIN-CNN-CIFAR_10",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/assignments/assignment_1/train_CNN.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--path",
+                "${workspaceFolder}/assignments/assignment_1/assignment_1_code/fdir",
+                "--save_path",
+                "${workspaceFolder}/saved_models",
+                "--num_epochs",
+                "30",
+                "--batch_size",
+                "128",
+                "--learning_rate",
+                "0.01"
+            ] 
         }
     ]
 }

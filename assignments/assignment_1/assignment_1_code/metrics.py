@@ -88,7 +88,7 @@ class Accuracy(PerformanceMeasure):
         """
 
         ## TODO implement
-        header  =  f"Accuracy: {self.accuracy() * 100:.2f} %\n" + f"Per class accuracy: {self.per_class_accuracy() * 100:.2f}"
+        header  =  f"Accuracy: {self.accuracy() * 100:.2f} %\n" + f"Per class accuracy: {self.per_class_accuracy() * 100:.2f}\n"
         body = [f"Accuracy for class: {label} is {self.correct_pred[label]/self.total_pred[label]:.2f}" for label in self.classes]
         return header + "\n".join(body) + "\n"
     
