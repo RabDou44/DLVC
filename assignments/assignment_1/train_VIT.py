@@ -9,8 +9,8 @@ import os
 from assignment_1_code.models.class_model import (
     DeepClassifier
 )  # etc. change to your model
-from assignment_1_code.models.cnn import (
-    YourCNN
+from assignment_1_code.models.vit import (
+    ViTClassifierModel
 )
 from assignment_1_code.metrics import Accuracy
 from assignment_1_code.trainer import ImgClassificationTrainer
@@ -57,7 +57,17 @@ def train(args):
     device = None
 
     # place for the VIT model you want - call inside wrapper
-    model = DeepClassifier(...)
+    model = DeepClassifier(ViTClassifierModel(num_transformer_layers=6,
+    embed_dim=192,
+    num_heads=3,
+    patch_size=16,
+    num_patches=4,
+    mlp_head_units=[512, 256],
+    num_classes=10,
+    batch_size=128,
+    device='cpu',
+    key_dim = 192,
+    ff_dim = 768))
     model.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
     loss_fn = torch.nn.CrossEntropyLoss()

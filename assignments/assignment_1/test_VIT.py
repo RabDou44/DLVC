@@ -11,6 +11,7 @@ from assignment_1_code.models.class_model import DeepClassifier
 from assignment_1_code.metrics import Accuracy
 from assignment_1_code.datasets.cifar10 import CIFAR10Dataset
 from assignment_1_code.datasets.dataset import Subset
+from assignment_1_code.models.vit import ViTClassifierModel
 
 
 def test(args):
@@ -38,7 +39,17 @@ def test(args):
     num_test_data = len(test_data)
 
     # place for the VIT model you want to test
-    model = DeepClassifier(...)
+    model = DeepClassifier(ViTClassifierModel(num_transformer_layers=6,
+    embed_dim=192,
+    num_heads=3,
+    patch_size=16,
+    num_patches=4,
+    mlp_head_units=[512, 256],
+    num_classes=10,
+    batch_size=128,
+    device='cpu',
+    key_dim = 192,
+    ff_dim = 768))
     model.load(args.model_path)
     # model.to(device)
 
@@ -75,7 +86,7 @@ if __name__ == "__main__":
         "-d", "--gpu_id", default="0", type=str, help="index of which GPU to use"
     )
     args.add_argument(
-        "-p", "--path", default="./assignments/assignment_1/assignment_1_code/fdir/", type=str, help="path to dataset"
+        "-p", "--path", default="./assignment_1_code/fdir/", type=str, help="path to dataset"
     )
     args.add_argument("-m","--model_path", default="./saved_models//best_model.pth", type=str, help="path to save model")
     args.add_argument("-b","--batch_size", default=128, type=int, help="batch size")

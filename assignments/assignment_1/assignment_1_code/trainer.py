@@ -196,8 +196,7 @@ class ImgClassificationTrainer(BaseTrainer):
                 print(self.val_metric)
 
                 # save metric summary to file\
-                with open(self.training_save_dir / f"{str(Subset.VALIDATION
-                                                          )}_log_{self.model.net.__class__.__name__}.csv", "a") as f:
+                with open(self.training_save_dir / f"{str(Subset.VALIDATION)}_log_{self.model.net.__class__.__name__}.csv", "a") as f:
                     f.write(f"{epoch+1}, {val_loss}, {val_mAcc}, {val_mPCAcc}\n")
                 # Save model if validation mPCAcc is higher than current best
 

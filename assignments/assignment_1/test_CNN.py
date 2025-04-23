@@ -76,7 +76,7 @@ if __name__ == "__main__":
         "-d", "--gpu_id", default="0", type=str, help="index of which GPU to use"
     )
     args.add_argument(
-        "-p", "--path", default="./assignments/assignment_1/assignment_1_code/fdir/", type=str, help="path to dataset"
+        "-p", "--path", default="./assignment_1_code/fdir/", type=str, help="path to dataset"
     )
     args.add_argument("-m","--model_path", default="./saved_models//best_model.pth", type=str, help="path to save model")
     args.add_argument("-b","--batch_size", default=128, type=int, help="batch size")
