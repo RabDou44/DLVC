@@ -37,6 +37,17 @@ def train(args):
             v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
     )
+    if args.augment > 0:
+        train_transform = v2.Compose(
+            [
+                v2.ToImage(),
+                v2.RandomHorizontalFlip(args.augment),
+                v2.RandomVerticalFlip(args.augment),
+                v2.RandomRotation(10),
+                v2.ToDtype(torch.float32, scale=True),
+                v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ]
+        )
 
     val_transform = v2.Compose(
         [
@@ -101,6 +112,9 @@ if __name__ == "__main__":
     args.add_argument("-e","--num_epochs", default=10, type=int, help="number of epochs")
     args.add_argument("-b","--batch_size", default=128, type=int, help="batch size")
     args.add_argument("-l","--learning_rate", default=0.001, type=float, help="learning rate")
+    args.add_argument("--dropout", default=0, type=bool, action="store_true", help="Use dropout in the model")
+    args.add_argument("--augment", default=0, type=float,action="probability of flip", help="Use data augmentation")
+
 
     if not isinstance(args, tuple):
         args = args.parse_args()

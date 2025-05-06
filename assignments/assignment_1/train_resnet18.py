@@ -3,6 +3,7 @@ import argparse
 import os
 import torch
 import torchvision.transforms.v2 as v2
+from torchvision import transforms
 from pathlib import Path
 import os
 
@@ -37,6 +38,17 @@ def train(args):
             v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
     )
+    if args.augment:
+        train_transform = v2.Compose(
+            [
+                v2.ToImage(),
+                v2.RandomHorizontalFlip(args.augment),
+                v2.RandomVerticalFlip(args.augment),
+                v2.RandomRotation(10),
+                v2.ToDtype(torch.float32, scale=True),
+                v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ]
+        )
 
     val_transform = v2.Compose(
         [
@@ -93,16 +105,14 @@ def train(args):
 if __name__ == "__main__":
     ## Feel free to change this part - you do not have to use this argparse and gpu handling
     args = argparse.ArgumentParser(description="Training")
-    args.add_argument(
-        "-d", "--gpu_id", default="0", type=str, help="index of which GPU to use"
-    )
-    args.add_argument(
-        "-p", "--path", default="./assignment_1_code/fdir/", type=str, help="path to dataset"
-    )
+    args.add_argument("-d", "--gpu_id", default="0", type=str, help="index of which GPU to use")
+    args.add_argument("-p", "--path", default="./assignment_1_code/fdir/", type=str, help="path to dataset")
     args.add_argument("-s","--save_path", default="./saved_models/", type=str, help="path to save model")
     args.add_argument("-e","--num_epochs", default=10, type=int, help="number of epochs")
     args.add_argument("-b","--batch_size", default=128, type=int, help="batch size")
     args.add_argument("-l","--learning_rate", default=0.001, type=float, help="learning rate")
+    args.add_argument("--dropout", default=0, type=bool, help="Use dropout in the model")
+    args.add_argument("--augment", default=0, type=float, help="Use data augmentation")
 
     if not isinstance(args, tuple):
         args = args.parse_args()
