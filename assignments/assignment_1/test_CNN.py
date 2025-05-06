@@ -5,6 +5,7 @@ import torch
 import torchvision.transforms.v2 as v2
 import os
 from pathlib import Path
+from tqdm import tqdm
 
 from torchvision.models import resnet18  # change to the model you want to test
 from assignment_1_code.models.class_model import DeepClassifier
@@ -46,7 +47,7 @@ def test(args):
     if not Path(args.results_path).exists():
         raise ValueError("[Path to results file does not exist]")
 
-    results_file_path = Path(args.results_path) / f"{Subset.TEST.__str__()}_log_ResNet18.csv"
+    results_file_path = Path(args.results_path) / f"{Subset.TEST.__str__()}_log_{model.__class__.__name__}.csv"
 
     loss_fn = torch.nn.CrossEntropyLoss()
 
@@ -56,7 +57,9 @@ def test(args):
     ### and metrics to terminal after testing is finished
     # ...sss
 
-    for batch_idx, (data, target) in enumerate(test_data_loader):
+    for batch_idx, (data, target) in tqdm(enumerate(test_data_loader),
+                                          desc="Testing CNN...",
+                                          total=len(test_data_loader)):
         # data = data.to(device)
         # target = target.to(device)
 
@@ -65,9 +68,10 @@ def test(args):
 
         test_metric.update(output, target)
 
-        with open(results_file_path, "a") as f:
-            f.write(f"{batch_idx+1},{loss.item()},{test_metric.accuracy()},{test_metric.per_class_accuracy()}\n")
-        print(test_metric)
+    with open(results_file_path, "w") as f:
+        f.write(f"{loss.item()},{test_metric.accuracy()},{test_metric.per_class_accuracy()}\n")
+    print(f"Saved in {results_file_path}")
+    print(test_metric)
 
 if __name__ == "__main__":
     ## Feel free to change this part - you do not have to use this argparse and gpu handling
@@ -96,6 +100,5 @@ if __name__ == "__main__":
     
     if args.num_epochs <= 0:
         raise ValueError("[Number of epochs must be greater than 0]")
-
 
     test(args)

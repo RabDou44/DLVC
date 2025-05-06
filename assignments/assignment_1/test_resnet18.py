@@ -5,6 +5,7 @@ import torch
 import torchvision.transforms.v2 as v2
 import os
 from pathlib import Path
+from tqdm import tqdm
 
 from torchvision.models import resnet18  # change to the model you want to test
 from assignment_1_code.models.class_model import DeepClassifier
@@ -56,7 +57,9 @@ def test(args):
     ### and metrics to terminal after testing is finished
     # ...sss
 
-    for batch_idx, (data, target) in enumerate(test_data_loader):
+    for batch_idx, (data, target) in tqdm(enumerate(test_data_loader),
+                                          desc="Testing resnet18...",
+                                          total=len(test_data_loader)):
         # data = data.to(device)
         # target = target.to(device)
 
@@ -67,6 +70,7 @@ def test(args):
 
         with open(results_file_path, "a") as f:
             f.write(f"{batch_idx+1},{loss.item()},{test_metric.accuracy()},{test_metric.per_class_accuracy()}\n")
+        print(f"Saved in {results_file_path}")
         print(test_metric)
 
 if __name__ == "__main__":
