@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from assignment_1_code.datasets import Subset
 import numpy as np
 import typing 
 import os
@@ -22,12 +23,13 @@ def visualize_statistics(path: Path, res_path: Path):
     # Extract the data from the lines
     data = []
     for line in lines:
+        parts = line.replace(" ", "").replace("\n", "")
         parts = line.split(",")
-        epoch = int(parts[0].split(":")[1])
-        loss = float(parts[1].split(":")[1])
-        accuracy = float(parts[2].split(":")[1])
-        average_accuracy = float(parts[3].split(":")[1])
-        data.append((epoch, loss, accuracy))
+        epoch = int(parts[0])
+        loss = float(parts[1])
+        accuracy = float(parts[2])
+        avg_accuracy = float(parts[3])
+        data.append((epoch, loss, accuracy, avg_accuracy))
 
     # Convert to numpy array for easier indexing
     data = np.array(data)
@@ -47,16 +49,25 @@ def visualize_statistics(path: Path, res_path: Path):
     ax2.plot(data[:, 0], data[:, 2], color=color)
     ax2.tick_params(axis="y", labelcolor=color)
 
+    ax3 = ax1.twinx()
+    color = "tab:green"
+    ax3.set_ylabel("Avg_accuracy", color=color)
+    ax3.plot(data[:, 0], data[:, 3], color=color)
+    ax3.tick_params(axis="y", labelcolor=color)
+
     fig.tight_layout()
     plt.title(f"Statistics from {path.name}")
     plt.show()
+
+    with open(res_path / f"{path.stem}.png", "wb") as f:
+        plt.savefig(f, format="png")
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Visualize statistics of the dataset")
     parser.add_argument(
         "--path",
         type=str,
-        default="./results/train_log_ResNet18.txt",
+        default="./saved_models/Subset.TRAINING_log_ResNet.csv",
         help="Path to the statistics file",
     )
     parser.add_argument(
@@ -69,7 +80,7 @@ if __name__ == "__main__":
     path = Path(args.path)
     res_path = Path(args.res_path)
 
-    if not path.exists():
+    if not path.exists() or not path.is_file():
         raise ValueError(f"[Path to statistics file does not exist] {path}")
     if not res_path.exists():
         os.makedirs(res_path, exist_ok=True)
