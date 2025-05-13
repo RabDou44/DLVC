@@ -10,11 +10,11 @@ import torch.nn.functional as F
 import torch
 
 
-class ViTClassifierModel(nn.Module):
+class VIT(nn.Module):
     """ViT Model for Image Classification."""
 
     def __init__(self, num_transformer_layers=3, mlp_head_units=None, num_classes=10, patch_size=None, num_patches=None,
-                 batch_size = None, embed_dim=None, device = None, num_heads=None, key_dim=None, ff_dim=None):
+                 batch_size = None, embed_dim=None, device = None, num_heads=None, key_dim=None, ff_dim=None, dropout_factor = 0.0):
         """Init Function."""
         super().__init__()
         if mlp_head_units is None:
@@ -33,7 +33,7 @@ class ViTClassifierModel(nn.Module):
             input_features=192,
             output_features=[512, 256],
             activation_function=torch.nn.GELU,
-            dropout_rate=0.5,
+            dropout_rate=0.5*dropout_factor,
         )
 
         self.logits_layer = torch.nn.Linear(mlp_head_units[-1], num_classes)

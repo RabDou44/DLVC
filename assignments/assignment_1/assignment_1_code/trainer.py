@@ -61,6 +61,8 @@ class ImgClassificationTrainer(BaseTrainer):
         training_save_dir: Path = Path("./trained_models"),
         batch_size: int = 4,
         val_frequency: int = 5,
+        augment: float = 0.0 ,
+        dropout: float = 0.0,
     ) -> None:
         """
         Args and Kwargs:
@@ -100,8 +102,16 @@ class ImgClassificationTrainer(BaseTrainer):
         self.training_save_dir = training_save_dir
         self.batch_size = batch_size
         self.val_frequency = val_frequency
+        self.augment = augment
+        self.dropout = dropout
 
         self.best_val_mPCAcc = 0.0
+
+        dropout_str = f"{self.dropout:.2f}".split(".")[1] 
+        augment_str = f"{self.augment:.2f}".split(".")[1] 
+        self.file_train_name = f"{str(Subset.TRAINING)}_log_{self.model.net.__class__.__name__}_{self.num_epochs}_{dropout_str}_{augment_str}"
+        self.file_val_name = f"{str(Subset.VALIDATION)}_log_{self.model.net.__class__.__name__}_{self.num_epochs}_{dropout_str}_{augment_str}"
+        self.model_suffix = f"_{self.num_epochs}_{dropout_str}_{augment_str}"
 
     def _train_epoch(self, epoch_idx: int) -> Tuple[float, float, float]:
         """
@@ -187,7 +197,7 @@ class ImgClassificationTrainer(BaseTrainer):
             print(self.train_metric)
 
             # save metric to file
-            with open(self.training_save_dir / f"{str(Subset.TRAINING)}_log_{self.model.net.__class__.__name__}.csv", "a") as f:
+            with open(self.training_save_dir / f"{self.file_train_name}.csv", "a") as f:
                 f.write(f"{epoch+1}, {train_loss}, {train_mAcc}, {train_mPCAcc}\n")
             
             # Validation
@@ -196,13 +206,13 @@ class ImgClassificationTrainer(BaseTrainer):
                 print(self.val_metric)
 
                 # save metric summary to file\
-                with open(self.training_save_dir / f"{str(Subset.VALIDATION)}_log_{self.model.net.__class__.__name__}.csv", "a") as f:
+                with open(self.training_save_dir / f"{self.file_val_name}.csv", "a") as f:
                     f.write(f"{epoch+1}, {val_loss}, {val_mAcc}, {val_mPCAcc}\n")
                 # Save model if validation mPCAcc is higher than current best
 
                 if val_mPCAcc > self.best_val_mPCAcc:
                     self.best_val_mPCAcc = val_mPCAcc
                     # torch.save(self.model.state_dict(), self.training_save_dir)
-                    self.model.save(self.training_save_dir)
+                    self.model.save(self.training_save_dir, suffix= self.model_suffix)
                     print(f"Model saved in {self.training_save_dir}")
 

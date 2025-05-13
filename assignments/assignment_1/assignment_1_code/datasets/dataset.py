@@ -13,6 +13,20 @@ class Subset(Enum):
     VALIDATION = 2
     TEST = 3
 
+    def __str__(self) -> str:
+        '''
+        Returns the string representation of the subset.
+        '''
+
+        if self == Subset.TRAINING:
+            return "Training"
+        elif self == Subset.VALIDATION:
+            return "Validation"
+        elif self == Subset.TEST:
+            return "Test"
+        else:
+            raise ValueError("Invalid subset")
+
 
 class Dataset(metaclass=ABCMeta):
     '''

@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-from assignment_1_code.datasets import Subset
 import numpy as np
 import typing 
 import os
@@ -35,32 +34,38 @@ def visualize_statistics(path: Path, res_path: Path):
     data = np.array(data)
 
     # Plotting
-    fig, ax1 = plt.subplots()
+    fig, ax = plt.subplots(1,3, figsize=(14, 4), sharex=True)
+    epochs = data[:, 0]
+    loss = data[:, 1]
+    mAcc = data[:, 2]
+    mPCAcc = data[:, 3]
 
     color = "tab:red"
-    ax1.set_xlabel("Epoch")
-    ax1.set_ylabel("Loss", color=color)
-    ax1.plot(data[:, 0], data[:, 1], color=color)
-    ax1.tick_params(axis="y", labelcolor=color)
+    ax[0].set_ylabel("Loss", color=color)
+    ax[0].plot(epochs, loss, color=color)
+    ax[0].tick_params(axis="y", labelcolor=color)
+    ax[0].set_title("Loss")
+    ax[0].set_xlabel("Epochs")
 
-    ax2 = ax1.twinx()
     color = "tab:blue"
-    ax2.set_ylabel("Accuracy", color=color)
-    ax2.plot(data[:, 0], data[:, 2], color=color)
-    ax2.tick_params(axis="y", labelcolor=color)
+    ax[1].set_ylabel("mAcc", color=color)
+    ax[1].plot(epochs, mAcc, color=color)
+    ax[1].tick_params(axis="y", labelcolor=color)
+    ax[1].set_title("mAcc") 
+    ax[1].set_xlabel("Epochs")
 
-    ax3 = ax1.twinx()
     color = "tab:green"
-    ax3.set_ylabel("Avg_accuracy", color=color)
-    ax3.plot(data[:, 0], data[:, 3], color=color)
-    ax3.tick_params(axis="y", labelcolor=color)
+    ax[2].set_ylabel("mPCAcc", color=color)
+    ax[2].plot(epochs, mPCAcc, color=color)
+    ax[2].tick_params(axis="y", labelcolor=color)
+    ax[2].set_title("mPCAcc")
+    ax[2].set_xlabel("Epochs")
 
     fig.tight_layout()
-    plt.title(f"Statistics from {path.name}")
-    plt.show()
 
     with open(res_path / f"{path.stem}.png", "wb") as f:
         plt.savefig(f, format="png")
+
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Visualize statistics of the dataset")
@@ -83,7 +88,8 @@ if __name__ == "__main__":
     if not path.exists() or not path.is_file():
         raise ValueError(f"[Path to statistics file does not exist] {path}")
     if not res_path.exists():
-        os.makedirs(res_path, exist_ok=True)
+        directory = os.path.dirname(res_path)
+        os.makedirs(directory, exist_ok=True)
     
     visualize_statistics(path, res_path)
 

@@ -18,7 +18,7 @@ class DeepClassifier(nn.Module):
         name_model = self.net.__class__.__name__
 
         ## TODO implement
-        path = save_dir / f"{name_model}" if suffix is None else save_dir / f"{name_model}{suffix}.pt"
+        path = save_dir / f"{name_model}" if suffix is None else save_dir / f"{name_model}{suffix}.pth"
         if not save_dir.exists():
             save_dir.mkdir(parents=True, exist_ok=True)
         torch.save(self.state_dict(), path)

@@ -10,7 +10,7 @@ from assignment_1_code.models.class_model import (
     DeepClassifier
 )  # etc. change to your model
 from assignment_1_code.models.vit import (
-    ViTClassifierModel
+    VIT
 )
 from assignment_1_code.metrics import Accuracy
 from assignment_1_code.trainer import ImgClassificationTrainer
@@ -37,13 +37,13 @@ def train(args):
             v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
     )
-    if args.augment:
+    if args.augment > 0:
         train_transform = v2.Compose(
             [
                 v2.ToImage(),
                 v2.RandomHorizontalFlip(args.augment),
                 v2.RandomVerticalFlip(args.augment),
-                v2.RandomRotation(10),
+                v2.RandomRotation(180*args.augment),
                 v2.ToDtype(torch.float32, scale=True),
                 v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ]
@@ -68,7 +68,7 @@ def train(args):
     device = None
 
     # place for the VIT model you want - call inside wrapper
-    model = DeepClassifier(ViTClassifierModel(num_transformer_layers=6,
+    model = DeepClassifier(VIT(num_transformer_layers=6,
     embed_dim=192,
     num_heads=3,
     patch_size=16,
@@ -78,7 +78,8 @@ def train(args):
     batch_size=128,
     device='cpu',
     key_dim = 192,
-    ff_dim = 768))
+    ff_dim = 768,
+    dropout_factor=args.dropout))
     model.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
     loss_fn = torch.nn.CrossEntropyLoss()
@@ -106,6 +107,8 @@ def train(args):
         model_save_dir,
         batch_size=128,  # feel free to change
         val_frequency=val_frequency,
+        augment=args.augment,
+        dropout=args.dropout
     )
     trainer.train()
 
@@ -122,7 +125,7 @@ if __name__ == "__main__":
     args.add_argument("-e","--num_epochs", default=10, type=int, help="number of epochs")
     args.add_argument("-b","--batch_size", default=128, type=int, help="batch size")
     args.add_argument("-l","--learning_rate", default=0.001, type=float, help="learning rate")
-    args.add_argument("--dropout", default=0, type=bool, help="Use dropout in the model")
+    args.add_argument("--dropout", default=0, type=float, help="Use dropout in the model")
     args.add_argument("--augment", default=0, type=float, help="Use data augmentation")
 
 
