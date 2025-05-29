@@ -47,7 +47,8 @@ class SegMetrics(PerformanceMeasure):
         Resets the internal state.
         '''
         ## TODO implement
-        self.confusion_matrix = torch.zeros((self.classes, self.classes), dtype=torch.int64)
+        num_classes = len(self.classes)
+        self.confusion_matrix = torch.zeros((num_classes, num_classes), dtype=torch.int64)
 
 
 
@@ -71,7 +72,7 @@ class SegMetrics(PerformanceMeasure):
             raise ValueError("Target should have 3 dimensions (b, h, w)")
 
         b, c, h, w = prediction.shape
-        if c != self.classes:
+        if c != len(self.classes):
             raise ValueError("Prediction count has to be equal to the number of classes")
         if target.shape[0] != b or target.shape[1] != h or target.shape[2] != w:
             raise ValueError("Target dimensions must match prediction dimensions of batchsize, "
@@ -85,9 +86,13 @@ class SegMetrics(PerformanceMeasure):
 
             pred_i, target_i = pred_i[target_i != 255], target_i[target_i != 255]
 
-            index = self.classes * target_i + pred_i
-            cm = torch.bincount(index, minlength=self.classes ** 2)
-            cm = cm.reshape(self.classes, self.classes)
+            pred_i = pred_i.to(torch.int64)
+            target_i = target_i.to(torch.int64)
+
+            index = len(self.classes) * target_i + pred_i
+            index = index.to(torch.int64)
+            cm = torch.bincount(index, minlength=len(self.classes) ** 2)
+            cm = cm.reshape(len(self.classes), len(self.classes))
             self.confusion_matrix += cm
    
 
@@ -117,8 +122,8 @@ class SegMetrics(PerformanceMeasure):
         false_neg = self.confusion_matrix.sum(1).float() - true_pos
         denominator = true_pos + false_pos + false_neg
 
-        iou = torch.zeros(self.classes, dtype=torch.float32)
-        for i in range(self.classes):
+        iou = torch.zeros(len(self.classes), dtype=torch.float32)
+        for i in range(len(self.classes)):
             if denominator[i] != 0:
                 iou[i] = true_pos[i] / denominator[i]
             else:
